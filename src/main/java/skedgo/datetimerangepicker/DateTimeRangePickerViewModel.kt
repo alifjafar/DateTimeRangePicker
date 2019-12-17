@@ -1,10 +1,10 @@
 package skedgo.datetimerangepicker
 
-import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
+import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
@@ -12,6 +12,9 @@ import org.joda.time.format.DateTimeFormatter
 import rx.Observable
 import rx.subjects.BehaviorSubject
 import java.util.*
+import org.joda.time.DateTimeFieldType.hourOfDay
+
+
 
 class DateTimeRangePickerViewModel(private val timeFormatter: TimeFormatter) {
   val startDateText = ObservableField<String>()
@@ -22,7 +25,7 @@ class DateTimeRangePickerViewModel(private val timeFormatter: TimeFormatter) {
   val hasEndDate = ObservableBoolean()
   val isCompletable = ObservableBoolean()
   val onStartTimeSelected: TimePickerDialog.OnTimeSetListener
-  val onEndTimeSelected: TimePickerDialog.OnTimeSetListener
+//  val onEndTimeSelected: TimePickerDialog.OnTimeSetListener
   val dateFormatter: DateTimeFormatter = DateTimeFormat.mediumDate()
 
   internal var timeZone: TimeZone? = TimeZone.getDefault()
@@ -36,18 +39,23 @@ class DateTimeRangePickerViewModel(private val timeFormatter: TimeFormatter) {
   }
 
   init {
-    onStartTimeSelected = TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
+    onStartTimeSelected = TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute, second ->
       startDateTime.value!!.let {
         val newValue = it.withHourOfDay(hourOfDay).withMinuteOfHour(minute)
         startDateTime.onNext(newValue)
+
       }
-    }
-    onEndTimeSelected = TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
       endDateTime.value!!.let {
         val newValue = it.withHourOfDay(hourOfDay).withMinuteOfHour(minute)
         endDateTime.onNext(newValue)
       }
     }
+//    onEndTimeSelected = TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute, second ->
+//      endDateTime.value!!.let {
+//        val newValue = it.withHourOfDay(hourOfDay).withMinuteOfHour(minute)
+//        endDateTime.onNext(newValue)
+//      }
+//    }
     startDateTime.subscribe {
       onDateTimeEmitted(it, startDateText, startTimeText, hasStartDate)
     }

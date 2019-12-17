@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.squareup.timessquare.CalendarPickerView
@@ -51,6 +52,32 @@ class DateTimeRangePickerActivity : AppCompatActivity() {
         )
     }
 
+    private fun checkDate(): Boolean {
+        var passes = true
+        val c = Calendar.getInstance(TimeZone.getTimeZone("GMT+07:00"))
+        val date = c.time
+        viewModel.startDateTime.value.let { start ->
+            val end = viewModel.endDateTime.value
+            if (DateFormat.format("dd", start.toDate()) == DateFormat.format("dd", end.toDate())) {
+                passes = false
+                Toast.makeText(
+                    applicationContext,
+                    "Tanggal mulai dan berakhir tidak boleh sama",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }else if (start.toDate() <= date) {
+                passes = false
+                Toast.makeText(
+                    applicationContext,
+                    "Waktu Pengambilan harus +6 jam dari waktu sekarang",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        return passes
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -63,8 +90,10 @@ class DateTimeRangePickerActivity : AppCompatActivity() {
         toolbar.setOnMenuItemClickListener { item ->
             when {
                 item.itemId == R.id.dateTimeRangePickerDoneItem -> {
-                    setResult(Activity.RESULT_OK, viewModel.createResultIntent())
-                    finish()
+                    if (checkDate()) {
+                        setResult(Activity.RESULT_OK, viewModel.createResultIntent())
+                        finish()
+                    }
                 }
             }
             true
@@ -112,7 +141,7 @@ class DateTimeRangePickerActivity : AppCompatActivity() {
             if (DateFormat.format("dd", it.toDate()) == DateFormat.format("dd", date))
                 tpd.setMinTime(c.get(Calendar.HOUR_OF_DAY) + 5, c.get(Calendar.MINUTE), 0)
             else
-                tpd.setMinTime(5, 0,0)
+                tpd.setMinTime(5, 0, 0)
         }
 
         tpd.show(supportFragmentManager, "TimePickerDialog")
